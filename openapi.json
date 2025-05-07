@@ -15,6 +15,10 @@
             "url": "https://opensource.org/licenses/MIT"
         }
     },
+    "externalDocs": {
+        "description": "Github",
+        "url": "https://github.com/opsminded/spec"
+    },
     "servers": [
         {
             "url": "{schema}://{domain}:{port}",
