@@ -1,0 +1,605 @@
+{
+    "openapi": "3.1.1",
+    "jsonSchemaDialect": "https://spec.openapis.org/oas/3.1/dialect/base",
+    "info": {
+        "title": "Graph Observability API",
+        "summary": "API para explorar recursos, dependências e caminhos em um grafo representando a infraestrutura de TI.",
+        "description": "Esta API foi criada para fornecer consultas rápidas e direcionadas sobre ativos de TI críticos para operações de produção. Ela não substitui soluções especializadas como CMDBs, sistemas de métricas, logs ou tracing, mas atua como um complemento observacional orientado a relações e dependências.\n\n## Conceitos básicos\nEsta API se baseia em uma estrutura de dados chamada grafo, que permite modelar relações entre objetos em um conjunto.\n\n### Um grafo é composto por:\n\n- **Vértices** (ou nós): Representam entidades, como servidores, microserviços ou bancos de dados.\n- **Arestas**: Representam relações entre os vértices, como dependências de rede ou acoplamentos funcionais.\n\nNeste sistema, a infraestrutura é modelada como um grafo direcionado e acíclico (DAG):\n\n- **Direcionado**: As relações têm um sentido, indicando por exemplo que \"Serviço A depende de Serviço B\".\n- **Acíclico**: O grafo não contém ciclos; ou seja, um nó não pode depender direta ou indiretamente de si mesmo.\n### Por que grafos acíclicos?\nCiclos em grafos de infraestrutura — onde um recurso depende direta ou indiretamente de si mesmo — podem levar a **sérios problemas operacionais e lógicos**, como:\n- **Dependência circular:** Dois ou mais recursos ficam mutuamente dependentes, tornando impossível definir uma ordem clara de inicialização, desligamento ou atualização.\n- **Diagnóstico comprometido:** Ciclos dificultam ou inviabilizam a análise de impacto. Por exemplo, se o Serviço A depende do B, que depende do C, que depende do A, então qual deles está causando uma falha?\n- **Propagação infinita de estados:** Em sistemas onde o status (como *unhealthy*) se propaga entre dependentes, um ciclo pode gerar **propagação indefinida** ou ambígua do estado.\n- **Deploys e pipelines quebrados:** Em ambientes de CI/CD, dependências cíclicas podem causar loops infinitos, impedindo o avanço de builds ou integrações automatizadas.\nPor esses motivos, a Graph Observability API **não permite** a criação ou representação de ciclos no grafo. O grafo segue a estrutura de um **DAG (Directed Acyclic Graph)**, que garante relações bem definidas e facilita análises confiáveis de dependência e impacto.\n## Dependency Scoping e Context-Aware Impact Analysis\nEm ambientes de infraestrutura complexa, é comum que múltiplos serviços compartilhem dependências críticas, como firewalls, bancos de dados e balanceadores de carga. Esses componentes funcionam como pontos de estrangulamento na topologia da arquitetura, e sua presença em vários caminhos pode causar confusão durante a análise de impacto ou visualização de dependências.\nPor exemplo, ao analisar os dependentes de um microserviço, pode-se erroneamente incluir diversos outros serviços apenas porque todos utilizam o mesmo banco de dados. Isso gera ruído e pode levar a interpretações incorretas sobre o impacto de falhas.\nA **Graph Observability API** foi projetada para lidar com esses cenários através de dois mecanismos:\n### 1. Dependency Scoping\nCada aresta do grafo pode conter metadados que indicam o tipo de dependência entre os nós, como `database`, `network`, `cache`, `authentication`, entre outros. Isso permite que os consumidores da API filtrem as dependências com base no tipo e no contexto da análise desejada.\n### 2. Context-Aware Impact Analysis\nAlém das conexões diretas, a API permite a definição de dependências críticas por serviço, com base em heurísticas ou curadoria. Essa abordagem permite realizar análises de impacto mais precisas, que consideram o contexto lógico da arquitetura e evitam incluir nós irrelevantes.\nEssas capacidades tornam a API adequada para ambientes reais de produção, nos quais a observabilidade precisa ser acurada e contextualizada, reduzindo o ruído e aumentando a confiança nas informações apresentadas.",
+        "version": "latest",
+        "contact": {
+            "name": "Tarcisio F Sassara",
+            "email": "tarcisio.sassara@dominio.com.br"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "servers": [
+        {
+            "url": "{schema}://{domain}:{port}",
+            "description": "Servidor local",
+            "variables": {
+                "schema": {
+                    "description": "Esquema do servidor",
+                    "enum": [
+                        "http",
+                        "https"
+                    ],
+                    "default": "http"
+                },
+                "domain": {
+                    "description": "Domínio do servidor",
+                    "default": "localhost"
+                },
+                "port": {
+                    "description": "Porta HTTP",
+                    "default": "8080"
+                }
+            }
+        }
+    ],
+    "security": [
+        {
+            "bearerHttpAuthentication": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "recursos",
+            "description": "Caminhos para consultar a base"
+        }
+    ],
+    "paths": {
+        "/summary": {
+            "get": {
+                "summary": "Resumo da infraestrutura",
+                "description": "Retorna dados resumidos e estatísticas gerais do grafo de infraestrutura.",
+                "operationId": "summary",
+                "responses": {
+                    "200": {
+                        "description": "Estatísticas gerais e informações resumidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Summary"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "recursos"
+                ]
+            }
+        },
+        "/vertices/{id}": {
+            "get": {
+                "summary": "Detalhes de um recurso",
+                "description": "Retorna informações detalhadas de um recurso específico. Este recurso pode ser um servidor, microserviço ou qualquer outro ativo em produção que pode afetar a experiência do usuário caso sua falha ocorra.",
+                "operationId": "getVertex",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalhes de um recurso selecionado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Vertex"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "recursos"
+                ]
+            }
+        },
+        "/vertices/{id}/lineages": {
+            "get": {
+                "summary": "Trilhas",
+                "description": "Retorna um sub-grafo com os dependentes de um recurso até a última dependência, eliminando os recursos vizinhos.",
+                "operationId": "getVertexLineages",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Trilhas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subgraph"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "recursos"
+                ]
+            }
+        },
+        "/vertices/{id}/neighbors": {
+            "get": {
+                "summary": "Vizinhos",
+                "description": "Retorna um sub-grafo com as dependências e os dependentes de um recurso informado.",
+                "operationId": "getVertexNeighbors",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Vizinhos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subgraph"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "recursos"
+                ]
+            }
+        },
+        "/vertices/{id}/dependants": {
+            "get": {
+                "summary": "Recursos dependentes",
+                "description": "Retorna um sub-grafo com os dependentes de um recurso informado.",
+                "operationId": "getVertexDependants",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "in": "query",
+                        "name": "all",
+                        "description": "Se verdadeiro, retorna todos os dependentes do recurso, mesmo que não estejam conectados diretamente.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "example": "false"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recursos dependentes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subgraph"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "recursos"
+                ]
+            }
+        },
+        "/vertices/{id}/dependencies": {
+            "get": {
+                "summary": "Dependencias de um recurso",
+                "description": "Retorna um sub-grafo com as dependências de um recurso informado.",
+                "operationId": "getVertexDependencies",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "in": "query",
+                        "name": "all",
+                        "description": "Se verdadeiro, retorna todas as dependências do recurso, mesmo que não estejam conectadas diretamente.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "example": "false"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dependencias de um recurso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subgraph"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "recursos"
+                ]
+            }
+        },
+        "/vertices/{id}/path/{destination}": {
+            "get": {
+                "summary": "Caminho entre dois recursos",
+                "description": "Retorna um sub-grafo com todos os recursos entre os informados.",
+                "operationId": "getPath",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "name": "destination",
+                        "in": "path",
+                        "description": "ID único do recurso de destino",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true,
+                        "example": "fd9a341a-0948-4b7f-aced-ae5769ab8db9"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Caminho entre dois recursos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Subgraph"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "recursos"
+                ]
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "id": {
+                "name": "id",
+                "in": "path",
+                "description": "ID único do recurso",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "example": "fd9a341a-0948-4b7f-aced-ae5769ab8db9"
+            }
+        },
+        "responses": {
+            "Unauthorized": {
+                "description": "Erro de autorização",
+                "content":{
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer",
+                                    "description": "Código do erro"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "description": "Mensagem de erro"
+                                }
+                            }
+                        },
+                        "example": {
+                            "code": 401,
+                            "error": "Unauthorized"
+                        }
+                    }
+                }
+            },
+            "InternalServerError": {
+                "description": "Erro interno do servidor",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer",
+                                    "description": "Código do erro"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "description": "Mensagem de erro"
+                                }
+                            }
+                        },
+                        "example": {
+                            "code": 500,
+                            "error": "Internal Server Error"
+                        }
+                    }
+                }
+            },
+            "NotFound": {
+                "description": "Recurso não encontrado",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer",
+                                    "description": "Código do erro"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "description": "Mensagem de erro"
+                                }
+                            }
+                        },
+                        "example": {
+                            "code": 404,
+                            "error": "Not Found"
+                        }
+                    }
+                }
+            },
+            "InvalidRequest": {
+                "description": "Requisição inválida",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer",
+                                    "description": "Código do erro"
+                                },
+                                "error": {
+                                    "type": "string",
+                                    "description": "Mensagem de erro"
+                                }
+                            }
+                        },
+                        "example": {
+                            "code": 422,
+                            "error": "Bad Request"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "Summary": {
+                "type": "object",
+                "title": "Resumo do Grafo de infraestrutura",
+                "description": "Um sumário sobre o estado da infraestrutura",
+                "properties": {
+                    "total_vertices": {
+                        "type": "integer",
+                        "title": "Total de itens",
+                        "description": "O número total de recursos presentes na base",
+                        "example": 123
+                    },
+                    "unhealthy_vertices": {
+                        "type": "array",
+                        "title": "Recurso não saudável",
+                        "description": "Lista de recursos não saudáveis",
+                        "items": {
+                            "$ref": "#/components/schemas/Vertex"
+                        }
+                    }
+                }
+            },
+            "Vertex": {
+                "type": "object",
+                "title": "Recurso",
+                "description": "Um ativo de TI",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "ID único do recurso",
+                        "example": "fd9a341a-0948-4b7f-aced-ae5769ab8db9"
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "Nome que será exibido",
+                        "examples": [
+                            "Server 01",
+                            "Server 02",
+                            "Server 03"
+                        ]
+                    },
+                    "class": {
+                        "type": "string",
+                        "description": "Classe ou Categoria do recurso",
+                        "examples": [
+                            "VMWare Server",
+                            "Database SQL Server",
+                            "Router"
+                        ]
+                    },
+                    "health": {
+                        "type": "boolean",
+                        "description": "Saúde do recurso. Um recurso pode não estar saudável por causa de um de suas dependências.",
+                        "examples": [
+                            false,
+                            true
+                        ]
+                    }
+                }
+            },
+            "Edge": {
+                "type": "object",
+                "title": "Relacionamento",
+                "description": "Um relacionamento entre recursos",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "ID único do relacionamento",
+                        "example": "fd9a341a-0948-4b7f-aced-ae5769ab8db9"
+                    },
+                    "label": {
+                        "type": "string",
+                        "description": "Nome do relacionamento que será exibido",
+                        "examples": [
+                            "Conexão com Firewall",
+                            "Conexão com Banco de Dados"
+                        ]
+                    },
+                    "class": {
+                        "type": "string",
+                        "description": "Classe ou Categoria do relacionamento",
+                        "examples": [
+                            "firewall_conn",
+                            "database_conn",
+                            "gateway_conn"
+                        ]
+                    }
+                }
+            },
+            "Subgraph": {
+                "type": "object",
+                "title": "Segmento de Grafo",
+                "description": "Recursos e seus relacionamentos apresentados de forma útil para consumo e visualização.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Nome que será exibido para a sessão do grafo",
+                        "examples": [
+                            "Recursos dependentes de \"DB2NSIUAO\"",
+                            "Dependências do Microserviço \"MS-SAK-OWIQ\""
+                        ]
+                    },
+                    "principal": {
+                        "$ref": "#/components/schemas/Vertex"
+                    },
+                    "highlights": {
+                        "type": "array",
+                        "title": "Destaques",
+                        "description": "Elementos que devem ser destacados no grafo",
+                        "items": {
+                            "$ref": "#/components/schemas/Vertex"
+                        }
+                    },
+                    "vertices": {
+                        "type": "array",
+                        "title": "Recursos",
+                        "description": "Lista de recursos que devem ser exibidos no grafo",
+                        "items": {
+                            "$ref": "#/components/schemas/Vertex"
+                        }
+                    },
+                    "edges": {
+                        "type": "array",
+                        "title": "Relacionamentos",
+                        "description": "Lista de relacionamentos que devem ser exibidos no grafo",
+                        "items": {
+                            "$ref": "#/components/schemas/Edge"
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerHttpAuthentication": {
+                "type": "http",
+                "scheme": "Bearer",
+                "bearerFormat": "JWT",
+                "description": "Bearer token using a JWT"
+            }
+        }
+    }
+}
