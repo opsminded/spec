@@ -537,6 +537,22 @@
                             "database_conn",
                             "gateway_conn"
                         ]
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "Label único do recurso de origem",
+                        "examples": [
+                            "DB2NSIUAO",
+                            "MS-SAK-OWIQ"
+                        ]
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "Label único do recurso de destino",
+                        "examples": [
+                            "DB2NSIUAO",
+                            "MS-SAK-OWIQ"
+                        ]
                     }
                 }
             },
