@@ -572,6 +572,11 @@
                     "principal": {
                         "$ref": "#/components/schemas/Vertex"
                     },
+                    "all": {
+                        "type": "boolean",
+                        "title": "All items",
+                        "description": "Se verdadeiro, retorna todos os itens do grafo, mesmo que não estejam conectados diretamente."
+                    },
                     "highlights": {
                         "type": "array",
                         "title": "Destaques",
