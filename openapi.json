@@ -83,14 +83,14 @@
                 ]
             }
         },
-        "/vertices/{id}": {
+        "/vertices/{label}": {
             "get": {
                 "summary": "Detalhes de um recurso",
                 "description": "Retorna informações detalhadas de um recurso específico. Este recurso pode ser um servidor, microserviço ou qualquer outro ativo em produção que pode afetar a experiência do usuário caso sua falha ocorra.",
                 "operationId": "getVertex",
                 "parameters": [
                     {
-                        "$ref": "#/components/parameters/id"
+                        "$ref": "#/components/parameters/label"
                     }
                 ],
                 "responses": {
@@ -122,14 +122,14 @@
                 ]
             }
         },
-        "/vertices/{id}/lineages": {
+        "/vertices/{label}/lineages": {
             "get": {
                 "summary": "Trilhas",
                 "description": "Retorna um sub-grafo com os dependentes de um recurso até a última dependência, eliminando os recursos vizinhos.",
                 "operationId": "getVertexLineages",
                 "parameters": [
                     {
-                        "$ref": "#/components/parameters/id"
+                        "$ref": "#/components/parameters/label"
                     }
                 ],
                 "responses": {
@@ -161,14 +161,14 @@
                 ]
             }
         },
-        "/vertices/{id}/neighbors": {
+        "/vertices/{label}/neighbors": {
             "get": {
                 "summary": "Vizinhos",
                 "description": "Retorna um sub-grafo com as dependências e os dependentes de um recurso informado.",
                 "operationId": "getVertexNeighbors",
                 "parameters": [
                     {
-                        "$ref": "#/components/parameters/id"
+                        "$ref": "#/components/parameters/label"
                     }
                 ],
                 "responses": {
@@ -200,14 +200,14 @@
                 ]
             }
         },
-        "/vertices/{id}/dependants": {
+        "/vertices/{label}/dependants": {
             "get": {
                 "summary": "Recursos dependentes",
                 "description": "Retorna um sub-grafo com os dependentes de um recurso informado.",
                 "operationId": "getVertexDependants",
                 "parameters": [
                     {
-                        "$ref": "#/components/parameters/id"
+                        "$ref": "#/components/parameters/label"
                     },
                     {
                         "in": "query",
@@ -250,14 +250,14 @@
                 ]
             }
         },
-        "/vertices/{id}/dependencies": {
+        "/vertices/{label}/dependencies": {
             "get": {
                 "summary": "Dependencias de um recurso",
                 "description": "Retorna um sub-grafo com as dependências de um recurso informado.",
                 "operationId": "getVertexDependencies",
                 "parameters": [
                     {
-                        "$ref": "#/components/parameters/id"
+                        "$ref": "#/components/parameters/label"
                     },
                     {
                         "in": "query",
@@ -300,25 +300,24 @@
                 ]
             }
         },
-        "/vertices/{id}/path/{destination}": {
+        "/vertices/{label}/path/{destination}": {
             "get": {
                 "summary": "Caminho entre dois recursos",
                 "description": "Retorna um sub-grafo com todos os recursos entre os informados.",
                 "operationId": "getPath",
                 "parameters": [
                     {
-                        "$ref": "#/components/parameters/id"
+                        "$ref": "#/components/parameters/label"
                     },
                     {
                         "name": "destination",
                         "in": "path",
-                        "description": "ID único do recurso de destino",
+                        "description": "Label único do recurso de destino",
                         "schema": {
-                            "type": "string",
-                            "format": "uuid"
+                            "type": "string"
                         },
                         "required": true,
-                        "example": "fd9a341a-0948-4b7f-aced-ae5769ab8db9"
+                        "example": "DB2SKDJ3"
                     }
                 ],
                 "responses": {
@@ -353,16 +352,15 @@
     },
     "components": {
         "parameters": {
-            "id": {
-                "name": "id",
+            "label": {
+                "name": "label",
                 "in": "path",
-                "description": "ID único do recurso",
+                "description": "Label único do recurso",
                 "required": true,
                 "schema": {
-                    "type": "string",
-                    "format": "uuid"
+                    "type": "string"
                 },
-                "example": "fd9a341a-0948-4b7f-aced-ae5769ab8db9"
+                "example": "DB2SKDJ3"
             }
         },
         "responses": {
@@ -490,12 +488,6 @@
                 "title": "Recurso",
                 "description": "Um ativo de TI",
                 "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "ID único do recurso",
-                        "example": "fd9a341a-0948-4b7f-aced-ae5769ab8db9"
-                    },
                     "label": {
                         "type": "string",
                         "description": "Nome que será exibido",
@@ -529,12 +521,6 @@
                 "title": "Relacionamento",
                 "description": "Um relacionamento entre recursos",
                 "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "ID único do relacionamento",
-                        "example": "fd9a341a-0948-4b7f-aced-ae5769ab8db9"
-                    },
                     "label": {
                         "type": "string",
                         "description": "Nome do relacionamento que será exibido",
