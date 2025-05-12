@@ -379,7 +379,11 @@
                                     "type": "string",
                                     "description": "Mensagem de erro"
                                 }
-                            }
+                            },
+                            "required": [
+                                "code",
+                                "error"
+                            ]
                         },
                         "example": {
                             "code": 401,
@@ -403,7 +407,11 @@
                                     "type": "string",
                                     "description": "Mensagem de erro"
                                 }
-                            }
+                            },
+                            "required": [
+                                "code",
+                                "error"
+                            ]
                         },
                         "example": {
                             "code": 500,
@@ -427,7 +435,11 @@
                                     "type": "string",
                                     "description": "Mensagem de erro"
                                 }
-                            }
+                            },
+                            "required": [
+                                "code",
+                                "error"
+                            ]
                         },
                         "example": {
                             "code": 404,
@@ -451,7 +463,11 @@
                                     "type": "string",
                                     "description": "Mensagem de erro"
                                 }
-                            }
+                            },
+                            "required": [
+                                "code",
+                                "error"
+                            ]
                         },
                         "example": {
                             "code": 422,
@@ -481,7 +497,11 @@
                             "$ref": "#/components/schemas/Vertex"
                         }
                     }
-                }
+                },
+                "required": [
+                    "total_vertices",
+                    "unhealthy_vertices"
+                ]
             },
             "Vertex": {
                 "type": "object",
@@ -506,15 +526,27 @@
                             "Router"
                         ]
                     },
-                    "health": {
-                        "type": "boolean",
+                    "status": {
+                        "type": "string",
                         "description": "Saúde do recurso. Um recurso pode não estar saudável por causa de um de suas dependências.",
+                        "enum": ["ok", "error"],
                         "examples": [
-                            false,
-                            true
+                            "error",
+                            "ok"
                         ]
+                    },
+                    "last_check": {
+                        "type": "string",
+                        "description": "O timestamp da última verificação",
+                        "format": "data-time"
                     }
-                }
+                },
+                "required": [
+                    "label",
+                    "class",
+                    "status",
+                    "last_check"
+                ]
             },
             "Edge": {
                 "type": "object",
@@ -554,7 +586,13 @@
                             "MS-SAK-OWIQ"
                         ]
                     }
-                }
+                },
+                "required": [
+                    "label",
+                    "class",
+                    "source",
+                    "destination"
+                ]
             },
             "Subgraph": {
                 "type": "object",
@@ -601,7 +639,15 @@
                             "$ref": "#/components/schemas/Edge"
                         }
                     }
-                }
+                },
+                "required": [
+                    "title",
+                    "principal",
+                    "all",
+                    "highlights",
+                    "vertices",
+                    "edges"
+                ]
             }
         },
         "securitySchemes": {
