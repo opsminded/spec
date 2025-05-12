@@ -483,6 +483,12 @@
                 "title": "Resumo do Grafo de infraestrutura",
                 "description": "Um sumário sobre o estado da infraestrutura",
                 "properties": {
+                    "total_edges": {
+                        "type": "integer",
+                        "title": "Total de relacionamentos",
+                        "description": "O número total de relacionamentos presentes na base",
+                        "example": 12030
+                    },
                     "total_vertices": {
                         "type": "integer",
                         "title": "Total de itens",
@@ -499,6 +505,7 @@
                     }
                 },
                 "required": [
+                    "total_edges",
                     "total_vertices",
                     "unhealthy_vertices"
                 ]
