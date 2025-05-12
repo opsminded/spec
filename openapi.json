@@ -200,11 +200,11 @@
                 ]
             }
         },
-        "/vertices/{label}/dependants": {
+        "/vertices/{label}/dependents": {
             "get": {
                 "summary": "Recursos dependentes",
                 "description": "Retorna um sub-grafo com os dependentes de um recurso informado.",
-                "operationId": "getVertexDependants",
+                "operationId": "getVertexDependents",
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/label"
