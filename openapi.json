@@ -524,7 +524,7 @@
                             "Server 03"
                         ]
                     },
-                    "status": {
+                    "healthy": {
                         "type": "boolean",
                         "description": "Saúde do recurso. Um recurso pode não estar saudável por causa de um de suas dependências.",
                         "examples": [
