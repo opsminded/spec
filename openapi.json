@@ -572,6 +572,14 @@
                 "title": "Recurso",
                 "description": "Um ativo de TI",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "identificador único do recurso",
+                        "examples": [
+                            "DB2NSIUAO",
+                            "MS-SAK-OWIQ"
+                        ]
+                    },
                     "label": {
                         "type": "string",
                         "description": "Nome que será exibido",
@@ -596,6 +604,7 @@
                     }
                 },
                 "required": [
+                    "id",
                     "label",
                     "healthy",
                     "last_check"
