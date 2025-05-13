@@ -524,22 +524,12 @@
                             "Server 03"
                         ]
                     },
-                    "class": {
-                        "type": "string",
-                        "description": "Classe ou Categoria do recurso",
-                        "examples": [
-                            "VMWare Server",
-                            "Database SQL Server",
-                            "Router"
-                        ]
-                    },
                     "status": {
-                        "type": "string",
+                        "type": "boolean",
                         "description": "Saúde do recurso. Um recurso pode não estar saudável por causa de um de suas dependências.",
-                        "enum": ["ok", "error"],
                         "examples": [
-                            "error",
-                            "ok"
+                            false,
+                            true
                         ]
                     },
                     "last_check": {
