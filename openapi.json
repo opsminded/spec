@@ -52,6 +52,10 @@
         {
             "name": "recursos",
             "description": "Caminhos para consultar a base"
+        },
+        {
+            "name": "administração",
+            "description": "Comandos de administração"
         }
     ],
     "paths": {
@@ -80,6 +84,27 @@
                 },
                 "tags": [
                     "recursos"
+                ]
+            }
+        },
+        "/vertices/clear-health-status": {
+            "post": {
+                "summary": "Limpar status de saúde",
+                "description": "Limpa o status de saúde de todos os recursos. Isso é útil para reiniciar a verificação de saúde após uma manutenção ou atualização.",
+                "operationId": "clearHealthStatus",
+                "responses": {
+                    "200": {
+                        "description": "Status de saúde limpo com sucesso"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "administração"
                 ]
             }
         },
@@ -119,6 +144,38 @@
                 },
                 "tags": [
                     "recursos"
+                ]
+            }
+        },
+        "/vertices/{label}/unhealthy": {
+            "post": {
+                "summary": "Marcar recurso como não saudável",
+                "description": "Marca um recurso como não saudável. Isso pode ser útil para indicar que um recurso está fora de operação ou com problemas.",
+                "operationId": "markVertexUnhealthy",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/label"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recurso marcado como não saudável com sucesso"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "administração"
                 ]
             }
         },
