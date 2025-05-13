@@ -540,8 +540,7 @@
                 },
                 "required": [
                     "label",
-                    "class",
-                    "status",
+                    "healthy",
                     "last_check"
                 ]
             },
