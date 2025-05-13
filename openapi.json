@@ -348,45 +348,6 @@
                     "recursos"
                 ]
             }
-        },
-        "/vertices/{label}/lineage": {
-            "get": {
-                "summary": "Linhagens de dependências",
-                "description": "Retorna um sub-grafo com a linhagem de um nó.",
-                "operationId": "getVertexLineage",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/label"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Dependencias de um recurso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Subgraph"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/Unauthorized"
-                    },
-                    "404": {
-                        "$ref": "#/components/responses/NotFound"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/InvalidRequest"
-                    },
-                    "500": {
-                        "$ref": "#/components/responses/InternalServerError"
-                    }
-                },
-                "tags": [
-                    "recursos"
-                ]
-            }
         }
     },
     "components": {
