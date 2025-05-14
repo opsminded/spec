@@ -658,6 +658,7 @@
                     }
                 },
                 "required": [
+                    "key",
                     "label",
                     "class",
                     "source",
