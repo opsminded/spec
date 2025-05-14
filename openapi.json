@@ -572,7 +572,7 @@
                 "title": "Recurso",
                 "description": "Um ativo de TI",
                 "properties": {
-                    "id": {
+                    "key": {
                         "type": "string",
                         "description": "identificador único do recurso",
                         "examples": [
@@ -604,7 +604,7 @@
                     }
                 },
                 "required": [
-                    "id",
+                    "key",
                     "label",
                     "healthy",
                     "last_check"
