@@ -179,45 +179,6 @@
                 ]
             }
         },
-        "/vertices/{key}/lineages": {
-            "get": {
-                "summary": "Trilhas",
-                "description": "Retorna um sub-grafo com os dependentes de um recurso até a última dependência, eliminando os recursos vizinhos.",
-                "operationId": "getVertexLineages",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/key"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Trilhas",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Subgraph"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/Unauthorized"
-                    },
-                    "404": {
-                        "$ref": "#/components/responses/NotFound"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/InvalidRequest"
-                    },
-                    "500": {
-                        "$ref": "#/components/responses/InternalServerError"
-                    }
-                },
-                "tags": [
-                    "recursos"
-                ]
-            }
-        },
         "/vertices/{key}/neighbors": {
             "get": {
                 "summary": "Vizinhos",
