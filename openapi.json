@@ -147,8 +147,38 @@
                 ]
             }
         },
-        "/vertices/{key}/unhealthy": {
+        "/vertices/{key}/healthy": {
             "post": {
+                "summary": "Marcar recurso como saudável",
+                "description": "Marca um recurso como saudável",
+                "operationId": "markVertexHealthy",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/key"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recurso marcado como saudável"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "administração"
+                ]
+            },
+            "delete": {
                 "summary": "Marcar recurso como não saudável",
                 "description": "Marca um recurso como não saudável. Isso pode ser útil para indicar que um recurso está fora de operação ou com problemas.",
                 "operationId": "markVertexUnhealthy",
