@@ -147,6 +147,38 @@
                 ]
             }
         },
+        "/vertices/{key}/attributes": {
+            "get": {
+                "summary": "Atributos de um recurso",
+                "description": "Retonar uma lista de atributos do recurso.",
+                "operationId": "getVertexAttributes",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/key"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recurso marcado como saudável"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/InvalidRequest"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                },
+                "tags": [
+                    "recursos"
+                ]
+            }
+        },
         "/vertices/{key}/healthy": {
             "post": {
                 "summary": "Marcar recurso como saudável",
@@ -414,7 +446,7 @@
         "responses": {
             "Unauthorized": {
                 "description": "Erro de autorização",
-                "content":{
+                "content": {
                     "application/json": {
                         "schema": {
                             "type": "object",
@@ -592,13 +624,59 @@
                         "type": "string",
                         "description": "O timestamp da última verificação",
                         "format": "data-time"
+                    },
+                    "attributes": {
+                        "type": "array",
+                        "description": "Lista de atributos adicionais do recurso",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Tipo do atributo",
+                                    "examples": [
+                                        "string",
+                                        "boolean",
+                                        "link"
+                                    ]
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "Descrição do atributo",
+                                    "examples": [
+                                        "Indica o status atual",
+                                        "Define a prioridade de execução"
+                                    ]
+                                },
+                                "value": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "boolean"
+                                        }
+                                    ],
+                                    "description": "Valor do atributo, que pode ser string, número ou booleano"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "description",
+                                "value"
+                            ]
+                        }
                     }
                 },
                 "required": [
                     "key",
                     "label",
                     "healthy",
-                    "last_check"
+                    "last_check",
+                    "attributes"
                 ]
             },
             "Edge": {
