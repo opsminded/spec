@@ -159,7 +159,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Recurso marcado como saudável"
+                        "description": "Atributos do recurso selecionado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VertexAttrubutes"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "$ref": "#/components/responses/Unauthorized"
@@ -624,60 +631,60 @@
                         "type": "string",
                         "description": "O timestamp da última verificação",
                         "format": "data-time"
-                    },
-                    "attributes": {
-                        "type": "array",
-                        "description": "Lista de atributos adicionais do recurso",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "type": {
-                                    "type": "string",
-                                    "description": "Tipo do atributo",
-                                    "examples": [
-                                        "string",
-                                        "boolean",
-                                        "link"
-                                    ]
-                                },
-                                "description": {
-                                    "type": "string",
-                                    "description": "Descrição do atributo",
-                                    "examples": [
-                                        "Indica o status atual",
-                                        "Define a prioridade de execução"
-                                    ]
-                                },
-                                "value": {
-                                    "oneOf": [
-                                        {
-                                            "type": "string"
-                                        },
-                                        {
-                                            "type": "integer"
-                                        },
-                                        {
-                                            "type": "boolean"
-                                        }
-                                    ],
-                                    "description": "Valor do atributo, que pode ser string, número ou booleano"
-                                }
-                            },
-                            "required": [
-                                "type",
-                                "description",
-                                "value"
-                            ]
-                        }
                     }
                 },
                 "required": [
                     "key",
                     "label",
                     "healthy",
-                    "last_check",
-                    "attributes"
+                    "last_check"
                 ]
+            },
+            "VertexAttrubutes": {
+                "type": "array",
+                "title": "Lista de atributos",
+                "description": "Lista de atributos do recurso",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "description": "Tipo do atributo",
+                            "examples": [
+                                "string",
+                                "boolean",
+                                "link"
+                            ]
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Descrição do atributo",
+                            "examples": [
+                                "Indica o status atual",
+                                "Define a prioridade de execução"
+                            ]
+                        },
+                        "value": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "boolean"
+                                }
+                            ],
+                            "description": "Valor do atributo, que pode ser string, número ou booleano"
+                        }
+                    },
+                    "required": [
+                        "type",
+                        "description",
+                        "value"
+                    ]
+                }
             },
             "Edge": {
                 "type": "object",
