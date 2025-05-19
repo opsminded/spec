@@ -619,6 +619,15 @@
                             "Server 03"
                         ]
                     },
+                    "class": {
+                        "type": "string",
+                        "description": "Classe do ativo",
+                        "examples": [
+                            "server",
+                            "router",
+                            "kubernetes_cluster"
+                        ]
+                    },
                     "healthy": {
                         "type": "boolean",
                         "description": "Saúde do recurso. Um recurso pode não estar saudável por causa de um de suas dependências.",
