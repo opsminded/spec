@@ -639,7 +639,11 @@
                     "last_check": {
                         "type": "string",
                         "description": "O timestamp da última verificação",
-                        "format": "data-time"
+                        "format": "data-time",
+                        "examples": [
+                            "2025-07-21T17:32:28Z",
+                            "2025-12-21T12:32:28Z"
+                        ]
                     }
                 },
                 "required": [
